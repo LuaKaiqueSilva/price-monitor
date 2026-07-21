@@ -1,7 +1,9 @@
-from .product import Product
 from .price_record import PriceRecord
+from .product import Product
+from .product_data import ProductData
 
 __all__ = [
     "Product",
     "PriceRecord",
+    "ProductData",
 ]
