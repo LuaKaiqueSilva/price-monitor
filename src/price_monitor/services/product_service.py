@@ -29,3 +29,8 @@ class ProductService:
         )
 
         return self._repository.save(product)
+
+    def list_products(self) -> list[Product]:
+        """Return all monitored products."""
+
+        return self._repository.get_all()
