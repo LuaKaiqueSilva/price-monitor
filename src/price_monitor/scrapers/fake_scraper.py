@@ -19,6 +19,6 @@ class FakeScraper(BaseScraper):
             name="RTX 4060",
             price=Decimal("1999.90"),
             currency="BRL",
-            store="Kabum",
+            store="KaBum",
             url=url,
         )

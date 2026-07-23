@@ -1,3 +1,12 @@
+beautifulsoup4==4.15.0
+certifi==2026.6.17
+charset-normalizer==3.4.9
 greenlet==3.5.3
+idna==3.18
+lxml==6.1.1
+-e git+ssh://git@github.com/LuaKaiqueSilva/price-monitor.git@bd4842b8db126425af4479a8d86272036e0a1f8c#egg=price_monitor
+requests==2.34.2
+soupsieve==2.9.1
 SQLAlchemy==2.0.51
 typing_extensions==4.16.0
+urllib3==2.7.0
