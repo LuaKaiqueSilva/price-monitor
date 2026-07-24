@@ -1,9 +1,10 @@
-from price_monitor.models import ProductData
-from price_monitor.scrapers.base import BaseScraper 
-from bs4 import BeautifulSoup
 from decimal import Decimal
 
 import requests
+from bs4 import BeautifulSoup
+
+from price_monitor.models import ProductData
+from price_monitor.scrapers.base import BaseScraper
 
 HEADERS = {
     "User-Agent": (
@@ -15,13 +16,13 @@ HEADERS = {
     )
 }
 
+
 class KabumScraper(BaseScraper):
-     
+
     @staticmethod
     def supports(url: str) -> bool:
         """Return True if the URL belongs to KaBuM."""
         return "kabum.com.br" in url.lower()
-
 
     def scrape(self, url: str) -> ProductData:
         html = self._download_page(url)
@@ -30,15 +31,14 @@ class KabumScraper(BaseScraper):
 
     def _download_page(self, url: str) -> str:
         response = requests.get(
-                url,
-                headers=HEADERS,
-                timeout=10,
+            url,
+            headers=HEADERS,
+            timeout=10,
         )
 
         response.raise_for_status()
 
         return response.text
-   
 
     def _parse_page(self, html: str, url: str) -> ProductData:
         soup = BeautifulSoup(html, "lxml")
@@ -56,7 +56,7 @@ class KabumScraper(BaseScraper):
         return ProductData(
             name=title.get_text(strip=True),
             price=self._parse_price(price.get_text()),
-            currency="BRL",         
+            currency="BRL",
             store="KaBuM",
             url=url,
         )

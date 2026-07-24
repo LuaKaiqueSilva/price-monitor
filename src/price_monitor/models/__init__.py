@@ -3,7 +3,7 @@ from .product import Product
 from .product_data import ProductData
 
 __all__ = [
-    "Product",
     "PriceRecord",
+    "Product",
     "ProductData",
 ]

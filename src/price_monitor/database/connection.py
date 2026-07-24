@@ -1,6 +1,5 @@
-from pathlib import Path
 import sqlite3
-
+from pathlib import Path
 
 DATABASE_FILE = Path("data") / "price_monitor.db"
 

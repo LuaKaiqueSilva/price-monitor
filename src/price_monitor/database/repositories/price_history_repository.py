@@ -1,9 +1,9 @@
-from sqlite3 import Connection
-
-from price_monitor.models import PriceRecord
 from datetime import datetime
 from decimal import Decimal
-from sqlite3 import Row
+from sqlite3 import Connection, Row
+
+from price_monitor.models import PriceRecord
+
 
 class PriceHistoryRepository:
     """Repository responsible for price history operations."""
@@ -26,9 +26,9 @@ class PriceHistoryRepository:
             VALUES (?, ?, ?)
              """,
             (
-            record.product_id,
-            str(record.price),
-            record.recorded_at.isoformat(),
+                record.product_id,
+                str(record.price),
+                record.recorded_at.isoformat(),
             ),
         )
 
@@ -68,4 +68,19 @@ class PriceHistoryRepository:
             product_id=row["product_id"],
             price=Decimal(row["price"]),
             recorded_at=datetime.fromisoformat(row["recorded_at"]),
-        ) 
+        )
+
+    def delete_by_product(self, product_id: int) -> None:
+        """Delete all price history of a product."""
+
+        cursor = self._connection.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM price_history
+            WHERE product_id = ?
+            """,
+            (product_id,),
+        )
+
+        self._connection.commit()
