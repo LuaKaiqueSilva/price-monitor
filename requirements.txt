@@ -2,6 +2,7 @@ altair==6.2.2
 anyio==4.14.2
 attrs==26.1.0
 beautifulsoup4==4.15.0
+black==26.5.1
 blinker==1.9.0
 certifi==2026.6.17
 charset-normalizer==3.4.9
@@ -18,20 +19,26 @@ jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
 lxml==6.1.1
 MarkupSafe==3.0.3
+mypy_extensions==1.1.0
 narwhals==2.24.0
 numpy==2.5.1
 packaging==26.2
 pandas==3.0.5
+pathspec==1.1.1
 pillow==12.3.0
--e git+ssh://git@github.com/LuaKaiqueSilva/price-monitor.git@3fdc8707cf2ef0ed820f237909d9c56ef41bb331#egg=price_monitor
+platformdirs==4.11.0
+plotly==6.9.0
+-e git+ssh://git@github.com/LuaKaiqueSilva/price-monitor.git@2b31c11b95c5285340f58d88b2826b9eb1ea5af8#egg=price_monitor
 protobuf==7.35.1
 pyarrow==24.0.0
 pydeck==0.9.3
 python-dateutil==2.9.0.post0
 python-multipart==0.0.32
+pytokens==0.4.1
 referencing==0.37.0
 requests==2.34.2
 rpds-py==2026.6.3
+ruff==0.16.0
 six==1.17.0
 smmap==5.0.3
 soupsieve==2.9.1

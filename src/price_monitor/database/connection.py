@@ -1,6 +1,8 @@
 import sqlite3
 from pathlib import Path
 
+from price_monitor.database.schema import initialize_database
+
 DATABASE_FILE = Path("data") / "price_monitor.db"
 
 
@@ -12,5 +14,7 @@ def get_connection() -> sqlite3.Connection:
     connection = sqlite3.connect(DATABASE_FILE)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
+
+    initialize_database(connection)
 
     return connection

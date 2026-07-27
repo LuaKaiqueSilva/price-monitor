@@ -77,11 +77,30 @@ class ProductService:
 
         return product
 
-    def update_all_products(self) -> None:
+    def update_all_products(self) -> list[tuple[str, str]]:
+        """Update all monitored products.
+
+        Returns:
+            List of (product_name, error_message) for failed updates.
+        """
+
+        errors: list[tuple[str, str]] = []
+
         products = self.list_products()
 
         for product in products:
-            self.update_product(product.id)
+            try:
+                self.update_product(product.id)
+
+            except Exception as error:
+                errors.append(
+                    (
+                        product.name,
+                        str(error),
+                    )
+                )
+
+        return errors
 
     def get_price_history(
         self,

@@ -1,10 +1,8 @@
-from price_monitor.database.connection import get_connection
+import sqlite3
 
 
-def initialize_database() -> None:
+def initialize_database(connection: sqlite3.Connection) -> None:
     """Create the database schema if it does not exist."""
-
-    connection = get_connection()
 
     cursor = connection.cursor()
 
@@ -26,9 +24,8 @@ def initialize_database() -> None:
             product_id INTEGER NOT NULL,
             price TEXT NOT NULL,
             recorded_at TEXT NOT NULL,
-            FOREIGN KEY(product_id) REFERENCES products(id)
+            FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
         )
     """)
 
     connection.commit()
-    connection.close()
