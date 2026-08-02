@@ -70,17 +70,4 @@ class PriceHistoryRepository:
             recorded_at=datetime.fromisoformat(row["recorded_at"]),
         )
 
-    def delete_by_product(self, product_id: int) -> None:
-        """Delete all price history of a product."""
 
-        cursor = self._connection.cursor()
-
-        cursor.execute(
-            """
-            DELETE FROM price_history
-            WHERE product_id = ?
-            """,
-            (product_id,),
-        )
-
-        self._connection.commit()

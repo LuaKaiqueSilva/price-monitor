@@ -113,6 +113,4 @@ class ProductService:
     def remove_product(self, product_id: int) -> bool:
         """Remove a monitored product."""
 
-        self._history_repository.delete_by_product(product_id)
-
         return self._product_repository.delete(product_id)
