@@ -14,7 +14,8 @@ def initialize_database(connection: sqlite3.Connection) -> None:
             current_price TEXT NOT NULL,
             currency TEXT NOT NULL,
             store TEXT NOT NULL,
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            last_updated TEXT
         )
     """)
 

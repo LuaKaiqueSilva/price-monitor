@@ -14,3 +14,4 @@ class Product:
     currency: str
     store: str
     created_at: datetime
+    last_updated: datetime | None

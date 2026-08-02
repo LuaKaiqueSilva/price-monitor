@@ -24,6 +24,11 @@ class ProductRepository:
             currency=row["currency"],
             store=row["store"],
             created_at=datetime.fromisoformat(row["created_at"]),
+            last_updated=(
+                datetime.fromisoformat(row["last_updated"])
+                if row["last_updated"] is not None
+                else None
+            ),
         )
 
     def get_by_id(self, product_id: int) -> Product | None:
@@ -60,9 +65,10 @@ class ProductRepository:
                 current_price,
                 currency,
                 store,
-                created_at
+                created_at,
+                last_updated
                 )
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     product.name,
@@ -71,6 +77,7 @@ class ProductRepository:
                     product.currency,
                     product.store,
                     product.created_at.isoformat(),
+                    product.last_updated.isoformat() if product.last_updated else None,
                 ),
             )
 
@@ -126,11 +133,13 @@ class ProductRepository:
         cursor.execute(
             """
             UPDATE products
-            SET name = ?,
-            url = ?,
-            current_price = ?,
-            currency = ?,
-            store = ?
+            SET 
+                name = ?,
+                url = ?,
+                current_price = ?,
+                currency = ?,
+                store = ?,
+                last_updated = ?
             WHERE id = ?
             """,
             (
@@ -139,6 +148,7 @@ class ProductRepository:
                 str(product.current_price),
                 product.currency,
                 product.store,
+                product.last_updated.isoformat() if product.last_updated else None,
                 product.id,
             ),
         )

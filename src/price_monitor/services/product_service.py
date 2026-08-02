@@ -33,6 +33,7 @@ class ProductService:
             currency=product_data.currency,
             store=product_data.store,
             created_at=datetime.now(),
+            last_updated=datetime.now(),
         )
 
         return self._product_repository.save(product)
@@ -53,11 +54,9 @@ class ProductService:
         scraper = ScraperFactory.get_scraper(product.url)
         product_data = scraper.scrape(product.url)
 
+        product.last_updated = datetime.now()
         old_price = product.current_price
         new_price = product_data.price
-
-        if old_price == new_price:
-            return product
 
         product.name = product_data.name
         product.current_price = product_data.price
@@ -66,14 +65,15 @@ class ProductService:
 
         self._product_repository.update(product)
 
-        record = PriceRecord(
-            id=None,
-            product_id=product.id,
-            price=product.current_price,
-            recorded_at=datetime.now(),
-        )
+        if old_price != new_price:
+            record = PriceRecord(
+                id=None,
+                product_id=product.id,
+                price=product.current_price,
+                recorded_at=datetime.now(),
+            )
 
-        self._history_repository.save(record)
+            self._history_repository.save(record)
 
         return product
 

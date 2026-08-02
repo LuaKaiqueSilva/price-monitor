@@ -118,14 +118,99 @@ if st.button("🔄 Update All Products"):
 
     else:
         st.success("All products updated successfully!")
+
 products = service.list_products()
 
+prices = [float(product.current_price) for product in products]
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.metric("Products", len(products))
+
+with col2:
+    st.metric(
+        "Average Price",
+        f"R$ {sum(prices)/len(prices):.2f}" if prices else "-",
+    )
+
+with col3:
+    st.metric(
+        "Lowest Price",
+        f"R$ {min(prices):.2f}" if prices else "-",
+    )
+
+with col4:
+    st.metric(
+        "Highest Price",
+        f"R$ {max(prices):.2f}" if prices else "-",
+    )
+
+st.divider()
+
+search_col, sort_col = st.columns([3, 1])
+
+with search_col:
+    search = st.text_input(
+        "🔍 Search",
+        placeholder="Search by product name...",
+    )
+
+    if search:
+        products = [
+            product for product in products if search.lower() in product.name.lower()
+        ]
+
+
+with sort_col:
+    sort = st.selectbox(
+        "Sort by",
+        (
+            "Newest",
+            "Oldest",
+            "Lowest price",
+            "Highest price",
+            "Name",
+        ),
+    )
+    if sort == "Newest":
+        products.sort(
+            key=lambda p: p.created_at,
+            reverse=True,
+        )
+
+    elif sort == "Oldest":
+        products.sort(
+            key=lambda p: p.created_at,
+        )
+
+    elif sort == "Lowest price":
+        products.sort(
+            key=lambda p: p.current_price,
+        )
+
+    elif sort == "Highest price":
+        products.sort(
+            key=lambda p: p.current_price,
+            reverse=True,
+        )
+
+    elif sort == "Name":
+        products.sort(
+            key=lambda p: p.name.lower(),
+        )
+
+st.divider()
+
 st.subheader("Monitored Products")
+
+if not products:
+    st.info("No monitored products yet.\n\n" "Add your first product above.")
 
 for product in products:
     with st.container(border=True):
         st.markdown(f"### {product.name}")
-        colp, cols, cola = st.columns(3)
+        colp, cols, cola, coll = st.columns(4)
         with colp:
             st.write("**Price:**")
             st.write(f"R$ {product.current_price}")
@@ -135,14 +220,49 @@ for product in products:
         with cola:
             st.write("**Added:**")
             st.write(f"{product.created_at.strftime('%d/%m/%Y %H:%M')}")
+        with coll:
+            st.write("**Last Updated:**")
 
-        if st.button(
-            "🗑 Remove",
-            key=f"remove_{product.id}",
-        ):
-            service.remove_product(product.id)
-            st.success("Product removed successfully!")
-            st.rerun()
+            if product.last_updated:
+                st.write(product.last_updated.strftime("%d/%m/%Y %H:%M"))
+            else:
+                st.write("-")
+
+        st.link_button(
+            "Open product page",
+            product.url,
+        )
+        col_update, col_remove = st.columns(2)
+
+        with col_update:
+            if st.button(
+                "🔄 Update",
+                key=f"update_{product.id}",
+                width="stretch",
+            ):
+
+                with st.spinner("Updating product..."):
+                    try:
+                        service.update_product(product.id)
+                        st.session_state.last_update = time.strftime("%H:%M:%S")
+                        st.success("Product updated successfully!")
+                        st.rerun()
+
+                    except (
+                        ScraperConnectionError,
+                        ProductNotFoundError,
+                    ) as error:
+                        st.error(str(error))
+
+        with col_remove:
+            if st.button(
+                "🗑 Remove",
+                key=f"remove_{product.id}",
+                width="stretch",
+            ):
+                service.remove_product(product.id)
+                st.success("Product removed successfully!")
+                st.rerun()
 
         with st.expander(
             "📈 Price History",
