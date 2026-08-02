@@ -103,8 +103,6 @@ src/price_monitor
 
 ## 🏗 Architecture
 
-Você fez um bom trabalho separando responsabilidades, então vale destacar isso.
-
 ```md
 ## 🏗 Architecture
 
@@ -122,8 +120,6 @@ This architecture makes the project easy to extend with new e-commerce stores an
 ---
 
 ## 🗺 Roadmap
-
-Isso mostra que o projeto continua evoluindo.
 
 ```md
 ## 🗺 Roadmap
