@@ -52,7 +52,7 @@ The project was designed following a layered architecture with repositories, ser
 Clone the repository:
 
 ```bash
-git clone https://github.com/SEU-USUARIO/price-monitor.git
+git clone [https://github.com/LuaKaiqueSilva/price-monitor.git]
 cd price-monitor
 ```
 Create a virtual environment:
