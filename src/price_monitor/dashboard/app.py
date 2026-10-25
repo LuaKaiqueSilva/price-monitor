@@ -19,6 +19,7 @@ from price_monitor.exceptions import (
     UnsupportedStoreError,
 )
 from price_monitor.services.product_service import ProductService
+from price_monitor.utils.csv_export import build_price_history_csv
 
 logging.basicConfig(
     level=logging.INFO,
@@ -394,4 +395,11 @@ for product in products:
                     table_df,
                     width="stretch",
                     hide_index=True,
+                )
+                st.download_button(
+                    "Download history as CSV",
+                    data=build_price_history_csv(product, history),
+                    file_name=f"price-history-{product.id or 'demo'}.csv",
+                    mime="text/csv",
+                    key=f"history_csv_{product.id}",
                 )
