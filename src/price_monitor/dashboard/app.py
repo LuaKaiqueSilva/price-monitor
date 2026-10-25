@@ -1,3 +1,4 @@
+import logging
 import time
 
 import pandas as pd
@@ -17,6 +18,12 @@ from price_monitor.exceptions import (
     UnsupportedStoreError,
 )
 from price_monitor.services.product_service import ProductService
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 connection = get_connection()
 product_repository = ProductRepository(connection)
@@ -111,8 +118,9 @@ if st.button("Add Product"):
 
     except ProductNotFoundError as error:
         st.error(str(error))
-    except Exception as error:
-        st.error(str(error))
+    except Exception:
+        logger.exception("Could not add product")
+        st.error("Could not add the product. Check the URL and try again.")
 
 st.subheader("Update Products")
 

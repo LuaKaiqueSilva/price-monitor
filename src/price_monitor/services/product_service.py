@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from price_monitor.database.repositories.price_history_repository import (
@@ -6,6 +7,8 @@ from price_monitor.database.repositories.price_history_repository import (
 from price_monitor.database.repositories.product_repository import ProductRepository
 from price_monitor.models import PriceRecord, Product
 from price_monitor.scrapers.scraper_factory import ScraperFactory
+
+logger = logging.getLogger(__name__)
 
 
 class ProductService:
@@ -104,6 +107,11 @@ class ProductService:
                 self.update_product(product.id)
 
             except Exception as error:
+                logger.exception(
+                    "Product update failed: id=%s name=%r",
+                    product.id,
+                    product.name,
+                )
                 errors.append(
                     (
                         product.name,

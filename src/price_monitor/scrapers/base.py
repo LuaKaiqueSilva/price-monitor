@@ -1,3 +1,4 @@
+import logging
 import re
 from abc import ABC, abstractmethod
 from decimal import Decimal
@@ -17,6 +18,8 @@ HEADERS = {
         "Chrome/138.0 Safari/537.36"
     )
 }
+
+logger = logging.getLogger(__name__)
 
 
 class BaseScraper(ABC):
@@ -46,6 +49,11 @@ class BaseScraper(ABC):
             return response.text
 
         except requests.RequestException as error:
+            try:
+                host = urlsplit(url).hostname or "unknown host"
+            except ValueError:
+                host = "invalid URL"
+            logger.warning("Request to %s failed (%s)", host, type(error).__name__)
             raise ScraperConnectionError("Unable to connect to the store.") from error
 
     @staticmethod

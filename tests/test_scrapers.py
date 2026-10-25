@@ -1,7 +1,14 @@
 import unittest
 from decimal import Decimal
+from unittest.mock import patch
 
-from price_monitor.exceptions import ProductNotFoundError, UnsupportedStoreError
+from requests import Timeout
+
+from price_monitor.exceptions import (
+    ProductNotFoundError,
+    ScraperConnectionError,
+    UnsupportedStoreError,
+)
 from price_monitor.scrapers.kabum import KabumScraper
 from price_monitor.scrapers.pichau import PichauScraper
 from price_monitor.scrapers.scraper_factory import ScraperFactory
@@ -58,6 +65,19 @@ class StoreSelectionTests(unittest.TestCase):
 
 
 class StoreParserTests(unittest.TestCase):
+    def test_request_failure_logs_store_host_without_product_path(self) -> None:
+        url = "https://www.kabum.com.br/produto/private-id"
+
+        with patch(
+            "price_monitor.scrapers.base.requests.get",
+            side_effect=Timeout("request timed out"),
+        ), self.assertLogs("price_monitor.scrapers.base", level="WARNING") as log:
+            with self.assertRaises(ScraperConnectionError):
+                KabumScraper()._download_page(url)
+
+        self.assertIn("kabum.com.br", log.output[0])
+        self.assertNotIn("private-id", log.output[0])
+
     def test_parses_kabum_sample_html(self) -> None:
         product = KabumScraper()._parse_page(
             "<h1>Teclado de exemplo</h1><h4 class='text-secondary-500'>R$ 199,90</h4>",

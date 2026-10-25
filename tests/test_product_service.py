@@ -89,6 +89,24 @@ class ProductServiceTests(unittest.TestCase):
         self.assertTrue(self.service.remove_product(product.id))
         self.assertEqual(self.service.get_price_history(product.id), [])
 
+    def test_update_all_logs_a_failed_product_and_continues(self) -> None:
+        self.add_product()
+        with patch(
+            "price_monitor.services.product_service.ScraperFactory.get_scraper",
+            return_value=FakeScraperError(),
+        ), self.assertLogs(
+            "price_monitor.services.product_service", level="ERROR"
+        ) as captured:
+            errors = self.service.update_all_products()
+
+        self.assertEqual(errors, [("Example product", "Store is unavailable")])
+        self.assertIn("Product update failed", captured.output[0])
+
+
+class FakeScraperError:
+    def scrape(self, url: str) -> ProductData:
+        raise RuntimeError("Store is unavailable")
+
 
 if __name__ == "__main__":
     unittest.main()
