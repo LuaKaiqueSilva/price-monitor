@@ -116,6 +116,41 @@ class StoreParserTests(unittest.TestCase):
         self.assertEqual(product.name, "Teclado de exemplo")
         self.assertEqual(product.price, Decimal("199.90"))
 
+    def test_kabum_uses_json_ld_when_visible_selectors_change(self) -> None:
+        html = '''
+            <script type="application/ld+json">
+            {"@context":"https://schema.org","@graph":[
+              {"@type":"Product","name":"SSD estruturado",
+               "offers":{"@type":"Offer","price":"349.90"}}
+            ]}
+            </script>
+        '''
+
+        product = KabumScraper()._parse_page(
+            html, "https://www.kabum.com.br/produto/123"
+        )
+
+        self.assertEqual(product.name, "SSD estruturado")
+        self.assertEqual(product.price, Decimal("349.90"))
+
+    def test_terabyte_uses_price_metadata_and_product_name_metadata(self) -> None:
+        html = '''
+            <meta property="og:title" content="Monitor por metadados">
+            <meta property="product:price:amount" content="1.299,90">
+        '''
+
+        product = TerabyteScraper()._parse_page(
+            html, "https://www.terabyteshop.com.br/produto/123"
+        )
+
+        self.assertEqual(product.name, "Monitor por metadados")
+        self.assertEqual(product.price, Decimal("1299.90"))
+
+    def test_ignores_malformed_json_ld_and_reports_missing_product(self) -> None:
+        html = '<script type="application/ld+json">{invalid}</script>'
+        with self.assertRaises(ProductNotFoundError):
+            KabumScraper()._parse_page(html, "https://www.kabum.com.br/produto/123")
+
     def test_parses_pichau_sample_html(self) -> None:
         scraper = PichauScraper()
         html = """

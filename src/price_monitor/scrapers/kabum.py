@@ -19,18 +19,18 @@ class KabumScraper(BaseScraper):
         soup = BeautifulSoup(html, "lxml")
 
         title = soup.find("h1")
-
-        if title is None:
+        name = title.get_text(strip=True) if title else self._fallback_product_name(soup)
+        if not name:
             raise ProductNotFoundError("Product title not found.")
 
         price = soup.select_one("h4.text-secondary-500")
-
-        if price is None:
+        price_text = price.get_text() if price else self._fallback_product_price(soup)
+        if not price_text:
             raise ProductNotFoundError("Product price not found.")
 
         return ProductData(
-            name=title.get_text(strip=True),
-            price=self._parse_price(price.get_text()),
+            name=name,
+            price=self._parse_price(price_text),
             currency="BRL",
             store="KaBuM",
             url=url,

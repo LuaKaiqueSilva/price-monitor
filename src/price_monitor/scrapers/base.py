@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from abc import ABC, abstractmethod
@@ -121,3 +122,78 @@ class BaseScraper(ABC):
             raise ValueError(f"Price has no digits after its separator: {text!r}")
 
         return Decimal(f"{integer_part}.{fractional_part}")
+
+    @staticmethod
+    def _json_ld_products(soup) -> list[dict]:
+        """Return Product objects found in schema.org JSON-LD scripts."""
+
+        products: list[dict] = []
+
+        def visit(value) -> None:
+            if isinstance(value, list):
+                for item in value:
+                    visit(item)
+            elif isinstance(value, dict):
+                product_type = value.get("@type", [])
+                if isinstance(product_type, str):
+                    product_type = [product_type]
+                if "Product" in product_type:
+                    products.append(value)
+                for key in ("@graph", "mainEntity", "itemListElement"):
+                    if key in value:
+                        visit(value[key])
+
+        for script in soup.select('script[type="application/ld+json"]'):
+            try:
+                visit(json.loads(script.string or script.get_text()))
+            except (json.JSONDecodeError, TypeError):
+                continue
+        return products
+
+    def _fallback_product_name(self, soup) -> str | None:
+        """Read a product name from metadata or structured data."""
+
+        for selector, attribute in (
+            ('meta[property="og:title"]', "content"),
+            ('meta[itemprop="name"]', "content"),
+        ):
+            tag = soup.select_one(selector)
+            if tag and tag.get(attribute):
+                return tag[attribute].strip()
+
+        for product in self._json_ld_products(soup):
+            name = product.get("name")
+            if isinstance(name, str) and name.strip():
+                return name.strip()
+        return None
+
+    def _fallback_product_price(self, soup) -> str | None:
+        """Read a price from common metadata or a Product's JSON-LD offers."""
+
+        for selector, attribute in (
+            ('meta[property="product:price:amount"]', "content"),
+            ('meta[itemprop="price"]', "content"),
+            ('meta[property="og:price:amount"]', "content"),
+        ):
+            tag = soup.select_one(selector)
+            if tag and tag.get(attribute):
+                return tag[attribute].strip()
+
+        def offer_price(offers) -> str | None:
+            if isinstance(offers, dict):
+                price = offers.get("price") or offers.get("lowPrice")
+                if price is not None:
+                    return str(price)
+                return offer_price(offers.get("offers"))
+            if isinstance(offers, list):
+                for offer in offers:
+                    price = offer_price(offer)
+                    if price is not None:
+                        return price
+            return None
+
+        for product in self._json_ld_products(soup):
+            price = offer_price(product.get("offers"))
+            if price:
+                return price
+        return None
