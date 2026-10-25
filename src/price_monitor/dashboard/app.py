@@ -27,6 +27,17 @@ service = ProductService(
     history_repository,
 )
 
+
+def show_update_errors(errors: list[tuple[str, str]]) -> None:
+    """Display product update failures in the dashboard."""
+
+    st.warning(f"Updated with {len(errors)} error(s).")
+
+    for product_name, message in errors:
+        st.write(f"• **{product_name}**")
+        st.caption(message)
+
+
 # -----------------------------------------------------------------------------
 # Sidebar
 # -----------------------------------------------------------------------------
@@ -62,9 +73,11 @@ if auto_update:
 
     if refresh_count > 0:
         with st.spinner("Auto updating products..."):
-            service.update_all_products()
+            errors = service.update_all_products()
 
         st.session_state.last_update = time.strftime("%H:%M:%S")
+        if errors:
+            show_update_errors(errors)
 
 # -----------------------------------------------------------------------------
 # Sidebar information
@@ -110,11 +123,7 @@ if st.button("🔄 Update All Products"):
     st.session_state.last_update = time.strftime("%H:%M:%S")
 
     if errors:
-        st.warning(f"Updated with {len(errors)} error(s).")
-
-        for product_name, message in errors:
-            st.write(f"• **{product_name}**")
-            st.caption(message)
+        show_update_errors(errors)
 
     else:
         st.success("All products updated successfully!")
