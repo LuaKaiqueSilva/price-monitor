@@ -5,6 +5,10 @@ A local dashboard for tracking product prices from Brazilian online stores. Add 
 ## Demo
 
 <p align="center">
+  <img src="assets/screenshots/dashboard-demo.png" alt="Price Monitor dashboard in demo mode with sample products and prices" width="900">
+</p>
+
+<p align="center">
   <img src="assets/gifs/Demo.gif" alt="Price Monitor dashboard demo" width="900">
 </p>
 
