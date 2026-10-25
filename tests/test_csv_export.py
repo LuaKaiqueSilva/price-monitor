@@ -1,6 +1,6 @@
 import csv
 import unittest
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from io import StringIO
 
@@ -17,12 +17,16 @@ class PriceHistoryCsvTests(unittest.TestCase):
             current_price=Decimal("299.90"),
             currency="BRL",
             store="KaBuM",
-            created_at=datetime(2026, 1, 1, 12, 0),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             last_updated=None,
         )
         history = [
-            PriceRecord(2, 8, Decimal("299.90"), datetime(2026, 2, 2, 10, 0)),
-            PriceRecord(1, 8, Decimal("349.90"), datetime(2026, 2, 1, 10, 0)),
+            PriceRecord(
+                2, 8, Decimal("299.90"), datetime(2026, 2, 2, 10, 0, tzinfo=UTC)
+            ),
+            PriceRecord(
+                1, 8, Decimal("349.90"), datetime(2026, 2, 1, 10, 0, tzinfo=UTC)
+            ),
         ]
 
         content = build_price_history_csv(product, history)
@@ -31,7 +35,7 @@ class PriceHistoryCsvTests(unittest.TestCase):
         rows = list(csv.DictReader(StringIO(content.decode("utf-8-sig"))))
         self.assertEqual(len(rows), 2)
         self.assertEqual(rows[0]["product"], 'SSD, "rápido"')
-        self.assertEqual(rows[0]["date"], "2026-02-01 10:00:00")
+        self.assertEqual(rows[0]["date"], "2026-02-01 10:00:00+00:00")
         self.assertEqual(rows[0]["price"], "349.90")
         self.assertEqual(rows[0]["store"], "KaBuM")
         self.assertEqual(rows[0]["currency"], "BRL")
@@ -45,7 +49,7 @@ class PriceHistoryCsvTests(unittest.TestCase):
             current_price=Decimal("10.00"),
             currency="BRL",
             store="KaBuM",
-            created_at=datetime(2026, 1, 1),
+            created_at=datetime(2026, 1, 1, tzinfo=UTC),
             last_updated=None,
         )
 
