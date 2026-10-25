@@ -11,6 +11,7 @@ from price_monitor.database.repositories.price_history_repository import (
     PriceHistoryRepository,
 )
 from price_monitor.database.repositories.product_repository import ProductRepository
+from price_monitor.demo import build_demo_data
 from price_monitor.exceptions import (
     DuplicateProductError,
     ProductNotFoundError,
@@ -25,14 +26,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-connection = get_connection()
-product_repository = ProductRepository(connection)
-history_repository = PriceHistoryRepository(connection)
-
-service = ProductService(
-    product_repository,
-    history_repository,
-)
+@st.cache_resource
+def get_product_service() -> ProductService:
+    connection = get_connection()
+    product_repository = ProductRepository(connection)
+    history_repository = PriceHistoryRepository(connection)
+    return ProductService(product_repository, history_repository)
 
 
 def show_update_errors(errors: list[tuple[str, str]]) -> None:
@@ -51,9 +50,13 @@ def show_update_errors(errors: list[tuple[str, str]]) -> None:
 
 st.sidebar.title("⚙️ Settings")
 
+demo_mode = st.sidebar.toggle("Demo mode", value=False, key="demo_mode")
+service = None if demo_mode else get_product_service()
+
 auto_update = st.sidebar.toggle(
     "Auto update",
     value=False,
+    disabled=demo_mode,
 )
 
 refresh_minutes = st.sidebar.selectbox(
@@ -72,7 +75,7 @@ if "last_update" not in st.session_state:
 # Auto update
 # -----------------------------------------------------------------------------
 
-if auto_update:
+if auto_update and not demo_mode:
     refresh_count = st_autorefresh(
         interval=refresh_minutes * 60 * 1000,
         key="auto_refresh",
@@ -86,11 +89,16 @@ if auto_update:
         if errors:
             show_update_errors(errors)
 
+if demo_mode:
+    st.info("Demo mode is on. Sample data is not saved, and store actions are disabled.")
+
 # -----------------------------------------------------------------------------
 # Sidebar information
 # -----------------------------------------------------------------------------
 
-if st.session_state.last_update is None:
+if demo_mode:
+    st.sidebar.caption("Data source: sample data")
+elif st.session_state.last_update is None:
     st.sidebar.caption("Last update: Never")
 else:
     st.sidebar.caption(f"Last update: {st.session_state.last_update}")
@@ -99,9 +107,13 @@ else:
 
 st.title("Price Monitor")
 
-url = st.text_input("Product URL", placeholder="https://www.kabum.com.br/produto/...")
+url = st.text_input(
+    "Product URL",
+    placeholder="https://www.kabum.com.br/produto/...",
+    disabled=demo_mode,
+)
 
-if st.button("Add Product"):
+if st.button("Add Product", disabled=demo_mode):
     try:
         product = service.add_product(url)
 
@@ -124,7 +136,7 @@ if st.button("Add Product"):
 
 st.subheader("Update Products")
 
-if st.button("🔄 Update All Products"):
+if st.button("🔄 Update All Products", disabled=demo_mode):
     with st.spinner("Updating products..."):
         errors = service.update_all_products()
 
@@ -136,7 +148,11 @@ if st.button("🔄 Update All Products"):
     else:
         st.success("All products updated successfully!")
 
-products = service.list_products()
+if demo_mode:
+    products, demo_history = build_demo_data()
+else:
+    products = service.list_products()
+    demo_history = {}
 
 prices = [float(product.current_price) for product in products]
 
@@ -245,10 +261,11 @@ for product in products:
             else:
                 st.write("-")
 
-        st.link_button(
-            "Open product page",
-            product.url,
-        )
+        if not demo_mode:
+            st.link_button(
+                "Open product page",
+                product.url,
+            )
         col_update, col_remove = st.columns(2)
 
         with col_update:
@@ -256,6 +273,7 @@ for product in products:
                 "🔄 Update",
                 key=f"update_{product.id}",
                 width="stretch",
+                disabled=demo_mode,
             ):
 
                 with st.spinner("Updating product..."):
@@ -276,6 +294,7 @@ for product in products:
                 "🗑 Remove",
                 key=f"remove_{product.id}",
                 width="stretch",
+                disabled=demo_mode,
             ):
                 service.remove_product(product.id)
                 st.success("Product removed successfully!")
@@ -285,7 +304,11 @@ for product in products:
             "📈 Price History",
             expanded=False,
         ):
-            history = service.get_price_history(product.id)
+            history = (
+                demo_history[product.id]
+                if demo_mode
+                else service.get_price_history(product.id)
+            )
 
             if not history:
                 st.info("No price history available.")

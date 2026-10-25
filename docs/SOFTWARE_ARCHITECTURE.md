@@ -13,6 +13,7 @@ flowchart LR
 ## Components
 
 - `dashboard/`: Streamlit interface for adding, updating, searching, and removing products, and viewing price history.
+- `demo.py`: in-memory sample products and histories for the dashboard preview.
 - `services/`: product workflows, including choosing a scraper and recording price changes.
 - `scrapers/`: shared request and parsing behavior plus one parser per supported store.
 - `database/repositories/`: SQL operations for products and price history.

@@ -16,6 +16,7 @@ A local dashboard for tracking product prices from Brazilian online stores. Add 
 - Search, sort, and review summary metrics for monitored products.
 - Use optional dashboard refresh to trigger periodic updates.
 - Retry temporary store failures and report access blocks clearly.
+- Preview the dashboard with sample data in offline demo mode.
 
 ## Supported stores
 
@@ -69,6 +70,8 @@ streamlit run src/price_monitor/dashboard/app.py
 ```
 
 Streamlit prints a local URL (usually <http://localhost:8501>). Paste a product URL into the dashboard to begin monitoring it. Product data is stored in `data/price_monitor.db` in the current working directory.
+
+To preview the dashboard without contacting stores or changing the database, turn on **Demo mode** in the sidebar.
 
 ## Run the command-line flow
 
