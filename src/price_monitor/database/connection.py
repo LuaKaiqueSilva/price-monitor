@@ -11,7 +11,9 @@ def get_connection() -> sqlite3.Connection:
 
     DATABASE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    connection = sqlite3.connect(DATABASE_FILE)
+    # Streamlit may rerun a session on a different script thread. The service
+    # is kept per session, so the connection is not shared across sessions.
+    connection = sqlite3.connect(DATABASE_FILE, check_same_thread=False)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
 

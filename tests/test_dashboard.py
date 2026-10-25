@@ -32,6 +32,23 @@ class DashboardDemoModeTests(unittest.TestCase):
             finally:
                 os.chdir(original_directory)
 
+    def test_dashboard_loads_the_local_database_outside_demo_mode(self) -> None:
+        project_root = Path(__file__).resolve().parents[1]
+        original_directory = Path.cwd()
+
+        with tempfile.TemporaryDirectory() as temp_directory:
+            try:
+                os.chdir(temp_directory)
+                app = AppTest.from_file(
+                    str(project_root / "src/price_monitor/dashboard/app.py")
+                )
+                app.run()
+
+                self.assertEqual(list(app.exception), [])
+                self.assertTrue(Path("data/price_monitor.db").exists())
+            finally:
+                os.chdir(original_directory)
+
 
 if __name__ == "__main__":
     unittest.main()

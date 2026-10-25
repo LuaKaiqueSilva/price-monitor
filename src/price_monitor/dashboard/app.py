@@ -28,12 +28,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-@st.cache_resource
 def get_product_service() -> ProductService:
+    """Keep a database service per Streamlit session, not globally shared."""
+
+    if "_product_service" in st.session_state:
+        return st.session_state["_product_service"]
+
     connection = get_connection()
     product_repository = ProductRepository(connection)
     history_repository = PriceHistoryRepository(connection)
-    return ProductService(product_repository, history_repository)
+    service = ProductService(product_repository, history_repository)
+    st.session_state["_product_service"] = service
+    return service
 
 
 def show_update_errors(errors: list[tuple[str, str]]) -> None:
