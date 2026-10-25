@@ -2,13 +2,17 @@
 
 This roadmap separates improvements to the current local app from larger future features. Store page changes can affect scraper reliability at any time.
 
+## Completed foundation
+
+- Add offline tests for price parsing, store selection, persistence, service workflows, and the dashboard demo.
+- Log scraper and product-update failures with useful context.
+- Add an in-memory demo mode that previews charts without writing to SQLite.
+- Retry temporary store failures and explain HTTP 403 access blocks.
+
 ## Next
 
-- Add automated tests for price parsing, store selection, persistence, and service workflows.
-- Add structured application logging for scraper and database errors.
 - Improve scraper resilience when stores change their page markup or block requests.
 - Revisit Pichau support; a product page returned HTTP 403 to the current Requests-based fetcher during validation.
-- Add a small sample database or offline demo mode so the dashboard can be previewed without live store pages.
 
 ## Later
 
