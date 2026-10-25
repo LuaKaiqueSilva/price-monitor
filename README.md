@@ -1,154 +1,100 @@
-README.md
+# Price Monitor
 
-# 📈 Price Monitor
-
-A Python application for monitoring product prices from Brazilian e-commerce stores.
-
----
+A local dashboard for tracking product prices from Brazilian online stores. Add a product URL, save its current price in SQLite, and review price changes over time.
 
 ## Demo
 
 <p align="center">
-  <img src="assets/gifs/Demo.gif" alt="Price Monitor Demo" width="900">
+  <img src="assets/gifs/Demo.gif" alt="Price Monitor dashboard demo" width="900">
 </p>
 
-## Overview
+## Features
 
-Price Monitor is a desktop application built with Python that allows users to monitor product prices over time.
+- Add products from supported store URLs and prevent duplicate registrations.
+- Update one product or all monitored products on demand.
+- Save price history locally and inspect it in an interactive chart.
+- Search, sort, and review summary metrics for monitored products.
+- Use optional dashboard refresh to trigger periodic updates.
 
-The application automatically collects product information from supported online stores, stores historical prices in a local SQLite database, and provides an interactive dashboard to visualize price trends and monitor changes.
+## Supported stores
 
-The project was designed following a layered architecture with repositories, services, and scraper abstractions, making it easy to extend with support for new stores.
+- KaBuM!
+- Pichau
+- TerabyteShop
 
----
+Scrapers depend on each store's current page structure, which may change over time.
 
-## ✨ Features
+## Requirements
 
-- Monitor products from supported online stores
-- Automatic price updates
-- Historical price tracking
-- Interactive price charts
-- Search products by name
-- Sort products by price, name, or creation date
-- Dashboard with summary metrics
-- Configurable automatic refresh
-- SQLite database for local persistence
-- Extensible scraper architecture
+- Python 3.11 or newer
+- Internet access to retrieve product pages
 
-## 🛠 Tech Stack
-
-| Category | Technologies |
-|----------|--------------|
-| Language | Python 3.12 |
-| Dashboard | Streamlit |
-| Database | SQLite |
-| Visualization | Plotly |
-| Data Analysis | Pandas |
-| Web Scraping | Requests, BeautifulSoup4 |
-| Code Quality | Black, Ruff |
-
-## 📦 Installation
+## Installation
 
 Clone the repository:
 
 ```bash
-git clone [https://github.com/LuaKaiqueSilva/price-monitor.git]
+git clone https://github.com/LuaKaiqueSilva/price-monitor.git
 cd price-monitor
 ```
-Create a virtual environment:
+
+Create and activate a virtual environment:
+
 ```bash
 python -m venv .venv
 ```
-Activate it:
 
-Linux/macOS:
+On Linux or macOS:
+
 ```bash
 source .venv/bin/activate
 ```
-Windows:
-```bash
-.venv\Scripts\activate
-```
-Install the dependencies:
-```bash
-pip install -r requirements.txt
-```
-## 🚀 Usage
 
-Launch the dashboard:
+On Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Install the project and its dependencies:
+
+```bash
+python -m pip install -e .
+```
+
+## Run the dashboard
 
 ```bash
 streamlit run src/price_monitor/dashboard/app.py
 ```
-Then open your browser at:
 
-http://localhost:8501
+Streamlit prints a local URL (usually <http://localhost:8501>). Paste a product URL into the dashboard to begin monitoring it. Product data is stored in `data/price_monitor.db` in the current working directory.
 
-Paste a supported product URL, click Add Product, and start monitoring prices.
+## Run the command-line flow
 
-## 📁 Project Structure
+```bash
+python -m price_monitor.main
+```
+
+## Development
+
+Install optional formatting and linting tools with:
+
+```bash
+python -m pip install -e ".[dev]"
+```
+
+## Project structure
 
 ```text
-src/price_monitor
-├── dashboard/          # Streamlit interface
-├── database/           # SQLite connection and repositories
-├── models/             # Domain models
-├── scrapers/           # Store scrapers
-├── services/           # Business logic
-└── exceptions.py       # Custom exceptions
+src/price_monitor/
+├── dashboard/       # Streamlit user interface
+├── database/        # SQLite schema and repositories
+├── models/          # Product and price history data models
+├── scrapers/        # Store-specific page parsers
+└── services/        # Product and price history workflows
 ```
 
+## License
 
----
-
-## 🏗 Architecture
-
-```md
-## 🏗 Architecture
-
-The project follows a layered architecture:
-
-- **Dashboard** – User interface built with Streamlit.
-- **Service Layer** – Coordinates business logic.
-- **Repositories** – Handle persistence in SQLite.
-- **Scrapers** – Extract product information from supported stores.
-- **Models** – Domain entities shared across the application.
-
-This architecture makes the project easy to extend with new e-commerce stores and additional dashboard features.
-```
-
----
-
-## 🗺 Roadmap
-
-```md
-## 🗺 Roadmap
-
-### Version 1.1
-
-- [ ] Playwright support
-- [ ] Additional store scrapers
-- [ ] Export price history to CSV
-- [ ] Price alerts
-
-### Version 2.0
-
-- [ ] Multi-store comparison
-- [ ] REST API
-- [ ] Docker support
-- [ ] Email notifications
-- [ ] User accounts
-```
-
----
-
-## 📄 License
-
-```md
-## 📄 License
-
-This project is licensed under the MIT License.
-See the LICENSE file for details.
-```
-
----
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
