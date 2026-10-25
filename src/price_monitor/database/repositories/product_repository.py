@@ -29,6 +29,11 @@ class ProductRepository:
                 if row["last_updated"] is not None
                 else None
             ),
+            target_price=(
+                Decimal(row["target_price"])
+                if row["target_price"] is not None
+                else None
+            ),
         )
 
     def get_by_id(self, product_id: int) -> Product | None:
@@ -66,9 +71,10 @@ class ProductRepository:
                 currency,
                 store,
                 created_at,
-                last_updated
+                last_updated,
+                target_price
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     product.name,
@@ -78,6 +84,7 @@ class ProductRepository:
                     product.store,
                     product.created_at.isoformat(),
                     product.last_updated.isoformat() if product.last_updated else None,
+                    str(product.target_price) if product.target_price is not None else None,
                 ),
             )
 
@@ -139,7 +146,8 @@ class ProductRepository:
                 current_price = ?,
                 currency = ?,
                 store = ?,
-                last_updated = ?
+                last_updated = ?,
+                target_price = ?
             WHERE id = ?
             """,
             (
@@ -149,6 +157,7 @@ class ProductRepository:
                 product.currency,
                 product.store,
                 product.last_updated.isoformat() if product.last_updated else None,
+                str(product.target_price) if product.target_price is not None else None,
                 product.id,
             ),
         )

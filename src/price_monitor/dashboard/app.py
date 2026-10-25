@@ -1,5 +1,6 @@
 import logging
 import time
+from decimal import Decimal
 
 import pandas as pd
 import plotly.express as px
@@ -261,6 +262,41 @@ for product in products:
                 st.write(product.last_updated.strftime("%d/%m/%Y %H:%M"))
             else:
                 st.write("-")
+
+        target_reached = (
+            product.target_price is not None
+            and product.current_price <= product.target_price
+        )
+        if target_reached:
+            st.success(f"Target reached: R$ {product.target_price:.2f}")
+
+        with st.form(f"target_form_{product.id}"):
+            target_enabled = st.checkbox(
+                "Notify me in the dashboard at my target price",
+                value=product.target_price is not None,
+                disabled=demo_mode,
+                key=f"target_enabled_{product.id}",
+            )
+            target_value = st.number_input(
+                "Target price (R$)",
+                min_value=0.01,
+                value=float(product.target_price or product.current_price),
+                step=10.0,
+                disabled=demo_mode or not target_enabled,
+                key=f"target_value_{product.id}",
+            )
+            save_target = st.form_submit_button(
+                "Save price target",
+                disabled=demo_mode,
+            )
+
+        if save_target:
+            service.set_target_price(
+                product.id,
+                Decimal(str(target_value)) if target_enabled else None,
+            )
+            st.success("Price target saved." if target_enabled else "Price target removed.")
+            st.rerun()
 
         if not demo_mode:
             st.link_button(

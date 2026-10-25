@@ -15,3 +15,4 @@ class Product:
     store: str
     created_at: datetime
     last_updated: datetime | None
+    target_price: Decimal | None = None

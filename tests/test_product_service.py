@@ -89,6 +89,21 @@ class ProductServiceTests(unittest.TestCase):
         self.assertTrue(self.service.remove_product(product.id))
         self.assertEqual(self.service.get_price_history(product.id), [])
 
+    def test_target_price_is_persisted_and_can_be_cleared(self) -> None:
+        product = self.add_product()
+
+        updated = self.service.set_target_price(product.id, Decimal("700.00"))
+        self.assertEqual(updated.target_price, Decimal("700.00"))
+        self.assertEqual(self.products.get_by_id(product.id).target_price, Decimal("700.00"))
+
+        cleared = self.service.set_target_price(product.id, None)
+        self.assertIsNone(cleared.target_price)
+
+    def test_target_price_must_be_positive(self) -> None:
+        product = self.add_product()
+        with self.assertRaisesRegex(ValueError, "greater than zero"):
+            self.service.set_target_price(product.id, Decimal(0))
+
     def test_update_all_logs_a_failed_product_and_continues(self) -> None:
         self.add_product()
         with patch(

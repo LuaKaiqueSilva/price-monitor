@@ -15,9 +15,17 @@ def initialize_database(connection: sqlite3.Connection) -> None:
             currency TEXT NOT NULL,
             store TEXT NOT NULL,
             created_at TEXT NOT NULL,
-            last_updated TEXT
+            last_updated TEXT,
+            target_price TEXT
         )
     """)
+
+    product_columns = {
+        row["name"]
+        for row in connection.execute("PRAGMA table_info(products)").fetchall()
+    }
+    if "target_price" not in product_columns:
+        cursor.execute("ALTER TABLE products ADD COLUMN target_price TEXT")
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS price_history (

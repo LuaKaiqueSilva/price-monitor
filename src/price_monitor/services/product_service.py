@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from decimal import Decimal
 
 from price_monitor.database.repositories.price_history_repository import (
     PriceHistoryRepository,
@@ -128,6 +129,17 @@ class ProductService:
         """Return the price history of a product."""
 
         return self._history_repository.get_by_product(product_id)
+
+    def set_target_price(self, product_id: int, target_price: Decimal | None) -> Product:
+        """Set or clear a product's price target."""
+
+        product = self._product_repository.get_by_id(product_id)
+        if product is None:
+            raise ValueError("Product not found.")
+        if target_price is not None and target_price <= 0:
+            raise ValueError("Target price must be greater than zero.")
+        product.target_price = target_price
+        return self._product_repository.update(product)
 
     def remove_product(self, product_id: int) -> bool:
         """Remove a monitored product."""
