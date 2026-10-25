@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
+from urllib.parse import urlsplit
 
 import requests
 
@@ -44,9 +45,23 @@ class BaseScraper(ABC):
             return response.text
 
         except requests.RequestException as error:
-            print(type(error))
-            print(error)
             raise ScraperConnectionError("Unable to connect to the store.") from error
+
+    @staticmethod
+    def _supports_domain(url: str, domain: str) -> bool:
+        """Return whether an HTTP(S) URL belongs to the expected domain."""
+
+        try:
+            parsed_url = urlsplit(url)
+            hostname = parsed_url.hostname
+        except ValueError:
+            return False
+
+        return (
+            parsed_url.scheme.lower() in {"http", "https"}
+            and hostname is not None
+            and (hostname.lower() == domain or hostname.lower().endswith(f".{domain}"))
+        )
 
     def _parse_price(self, text: str) -> Decimal:
         """Convert Brazilian price text into Decimal."""

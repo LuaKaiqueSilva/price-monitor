@@ -10,7 +10,7 @@ class TerabyteScraper(BaseScraper):
 
     @staticmethod
     def supports(url: str) -> bool:
-        return "terabyteshop.com.br" in url.lower()
+        return BaseScraper._supports_domain(url, "terabyteshop.com.br")
 
     def scrape(self, url: str) -> ProductData:
         html = self._download_page(url)

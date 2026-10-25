@@ -9,7 +9,7 @@ class KabumScraper(BaseScraper):
 
     @staticmethod
     def supports(url: str) -> bool:
-        return "kabum.com.br" in url.lower()
+        return BaseScraper._supports_domain(url, "kabum.com.br")
 
     def scrape(self, url: str) -> ProductData:
         html = self._download_page(url)

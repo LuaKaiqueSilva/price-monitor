@@ -25,6 +25,7 @@ class ProductService:
         scraper = ScraperFactory.get_scraper(url)
         product_data = scraper.scrape(url)
 
+        now = datetime.now()
         product = Product(
             id=None,
             name=product_data.name,
@@ -32,11 +33,21 @@ class ProductService:
             current_price=product_data.price,
             currency=product_data.currency,
             store=product_data.store,
-            created_at=datetime.now(),
-            last_updated=datetime.now(),
+            created_at=now,
+            last_updated=now,
         )
 
-        return self._product_repository.save(product)
+        saved_product = self._product_repository.save(product)
+        self._history_repository.save(
+            PriceRecord(
+                id=None,
+                product_id=saved_product.id,
+                price=saved_product.current_price,
+                recorded_at=now,
+            )
+        )
+
+        return saved_product
 
     def list_products(self) -> list[Product]:
         """Return all monitored products."""

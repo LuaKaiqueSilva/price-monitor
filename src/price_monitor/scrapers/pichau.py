@@ -9,7 +9,7 @@ class PichauScraper(BaseScraper):
 
     @staticmethod
     def supports(url: str) -> bool:
-        return "pichau.com.br" in url.lower()
+        return BaseScraper._supports_domain(url, "pichau.com.br")
 
     def scrape(self, url: str) -> ProductData:
         html = self._download_page(url)
