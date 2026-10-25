@@ -5,6 +5,8 @@ from decimal import Decimal
 from urllib.parse import urlsplit
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from price_monitor.exceptions import ScraperConnectionError
 from price_monitor.models import ProductData
@@ -20,6 +22,16 @@ HEADERS = {
 }
 
 logger = logging.getLogger(__name__)
+RETRY_POLICY = Retry(
+    total=2,
+    connect=2,
+    read=2,
+    status=2,
+    backoff_factor=0.25,
+    status_forcelist=(429, 500, 502, 503, 504),
+    allowed_methods=frozenset({"GET"}),
+    raise_on_status=False,
+)
 
 
 class BaseScraper(ABC):
@@ -38,15 +50,18 @@ class BaseScraper(ABC):
         """Download the HTML page."""
 
         try:
-            response = requests.get(
-                url,
-                headers=HEADERS,
-                timeout=10,
-            )
+            with requests.Session() as session:
+                adapter = HTTPAdapter(max_retries=RETRY_POLICY)
+                session.mount("http://", adapter)
+                session.mount("https://", adapter)
+                response = session.get(
+                    url,
+                    headers=HEADERS,
+                    timeout=10,
+                )
+                response.raise_for_status()
 
-            response.raise_for_status()
-
-            return response.text
+                return response.text
 
         except requests.RequestException as error:
             try:
@@ -54,7 +69,11 @@ class BaseScraper(ABC):
             except ValueError:
                 host = "invalid URL"
             logger.warning("Request to %s failed (%s)", host, type(error).__name__)
-            raise ScraperConnectionError("Unable to connect to the store.") from error
+            if error.response is not None and error.response.status_code == 403:
+                message = "The store denied access to this page (HTTP 403)."
+            else:
+                message = "Unable to connect to the store."
+            raise ScraperConnectionError(message) from error
 
     @staticmethod
     def _supports_domain(url: str, domain: str) -> bool:

@@ -1,7 +1,8 @@
 import unittest
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
+import requests
 from requests import Timeout
 
 from price_monitor.exceptions import (
@@ -67,16 +68,44 @@ class StoreSelectionTests(unittest.TestCase):
 class StoreParserTests(unittest.TestCase):
     def test_request_failure_logs_store_host_without_product_path(self) -> None:
         url = "https://www.kabum.com.br/produto/private-id"
+        session = MagicMock()
+        session.__enter__.return_value = session
+        session.get.side_effect = Timeout("request timed out")
 
         with patch(
-            "price_monitor.scrapers.base.requests.get",
-            side_effect=Timeout("request timed out"),
+            "price_monitor.scrapers.base.requests.Session",
+            return_value=session,
         ), self.assertLogs("price_monitor.scrapers.base", level="WARNING") as log:
             with self.assertRaises(ScraperConnectionError):
                 KabumScraper()._download_page(url)
 
         self.assertIn("kabum.com.br", log.output[0])
         self.assertNotIn("private-id", log.output[0])
+        self.assertEqual(session.get.call_count, 1)
+        self.assertEqual(session.mount.call_count, 2)
+        for call in session.mount.call_args_list:
+            adapter = call.args[1]
+            self.assertEqual(adapter.max_retries.total, 2)
+            self.assertIn(429, adapter.max_retries.status_forcelist)
+
+    def test_http_403_has_a_clear_user_facing_error(self) -> None:
+        response = MagicMock(status_code=403)
+        response.raise_for_status.side_effect = requests.HTTPError(
+            "forbidden", response=response
+        )
+        session = MagicMock()
+        session.__enter__.return_value = session
+        session.get.return_value = response
+
+        with (
+            patch(
+                "price_monitor.scrapers.base.requests.Session",
+                return_value=session,
+            ),
+            self.assertLogs("price_monitor.scrapers.base", level="WARNING"),
+            self.assertRaisesRegex(ScraperConnectionError, "HTTP 403"),
+        ):
+            KabumScraper()._download_page("https://www.kabum.com.br/produto/123")
 
     def test_parses_kabum_sample_html(self) -> None:
         product = KabumScraper()._parse_page(

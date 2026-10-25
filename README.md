@@ -15,6 +15,7 @@ A local dashboard for tracking product prices from Brazilian online stores. Add 
 - Save price history locally and inspect it in an interactive chart.
 - Search, sort, and review summary metrics for monitored products.
 - Use optional dashboard refresh to trigger periodic updates.
+- Retry temporary store failures and report access blocks clearly.
 
 ## Supported stores
 
