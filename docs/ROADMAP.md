@@ -14,7 +14,7 @@ This roadmap separates improvements to the current local app from larger future 
 ## Next
 
 - Improve scraper resilience when stores change their page markup or block requests.
-- Revisit Pichau support; a product page returned HTTP 403 to the current Requests-based fetcher during validation.
+- Pichau's parser now handles its observed Pix selector, JSON-LD, and price metadata. Keep it disabled until direct Requests fetching no longer returns the site's HTTP 403 maintenance page.
 
 ## Later
 

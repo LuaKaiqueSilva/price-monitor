@@ -72,12 +72,15 @@ class StoreParserTests(unittest.TestCase):
         session.__enter__.return_value = session
         session.get.side_effect = Timeout("request timed out")
 
-        with patch(
-            "price_monitor.scrapers.base.requests.Session",
-            return_value=session,
-        ), self.assertLogs("price_monitor.scrapers.base", level="WARNING") as log:
-            with self.assertRaises(ScraperConnectionError):
-                KabumScraper()._download_page(url)
+        with (
+            patch(
+                "price_monitor.scrapers.base.requests.Session",
+                return_value=session,
+            ),
+            self.assertLogs("price_monitor.scrapers.base", level="WARNING") as log,
+            self.assertRaises(ScraperConnectionError),
+        ):
+            KabumScraper()._download_page(url)
 
         self.assertIn("kabum.com.br", log.output[0])
         self.assertNotIn("private-id", log.output[0])
@@ -191,6 +194,37 @@ class StoreParserTests(unittest.TestCase):
         self.assertEqual(product.name, "Processador de exemplo")
         self.assertEqual(product.price, Decimal("849.99"))
         self.assertEqual(product.store, "Pichau")
+
+    def test_parses_pichau_current_price_selector(self) -> None:
+        html = '''
+            <h1>Placa de vídeo de exemplo</h1>
+            <div class="mui-1jk88bq-price_vista-extraSpacePriceVista">
+              R$ 239,99
+            </div>
+            <div class="mui-7ie9un-price_total">R$ 282,34</div>
+        '''
+
+        product = PichauScraper()._parse_page(
+            html, "https://www.pichau.com.br/placa-de-video-exemplo"
+        )
+
+        self.assertEqual(product.price, Decimal("239.99"))
+
+    def test_pichau_uses_real_product_metadata_when_markup_changes(self) -> None:
+        html = '''
+            <meta name="product:price:amount" content="R$ 239.99">
+            <script type="application/ld+json">
+            {"@type":"Product","name":"Placa Pichau",
+             "offers":{"priceCurrency":"BRL","price":"282.34"}}
+            </script>
+        '''
+
+        product = PichauScraper()._parse_page(
+            html, "https://www.pichau.com.br/placa-de-video-exemplo"
+        )
+
+        self.assertEqual(product.name, "Placa Pichau")
+        self.assertEqual(product.price, Decimal("239.99"))
 
     def test_parses_terabyte_sample_html(self) -> None:
         product = TerabyteScraper()._parse_page(

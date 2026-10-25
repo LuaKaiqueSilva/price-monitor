@@ -172,6 +172,7 @@ class BaseScraper(ABC):
 
         for selector, attribute in (
             ('meta[property="product:price:amount"]', "content"),
+            ('meta[name="product:price:amount"]', "content"),
             ('meta[itemprop="price"]', "content"),
             ('meta[property="og:price:amount"]', "content"),
         ):

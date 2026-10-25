@@ -19,8 +19,10 @@ class PichauScraper(BaseScraper):
         soup = BeautifulSoup(html, "lxml")
 
         title = soup.find("h1")
-
-        if title is None:
+        name = (title.get_text(strip=True) if title else "") or self._fallback_product_name(
+            soup
+        )
+        if not name:
             raise ProductNotFoundError("Product title not found.")
 
         price = soup.find(
@@ -28,12 +30,15 @@ class PichauScraper(BaseScraper):
             class_=lambda c: c and "price_vista" in c,
         )
 
-        if price is None:
+        price_text = (price.get_text() if price else "") or self._fallback_product_price(
+            soup
+        )
+        if not price_text:
             raise ProductNotFoundError("Product price not found.")
 
         return ProductData(
-            name=title.get_text(strip=True),
-            price=self._parse_price(price.get_text()),
+            name=name,
+            price=self._parse_product_price(price_text),
             currency="BRL",
             store="Pichau",
             url=url,
