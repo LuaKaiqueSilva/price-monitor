@@ -1,12 +1,10 @@
 from price_monitor.exceptions import UnsupportedStoreError
 from price_monitor.scrapers.base import BaseScraper
 from price_monitor.scrapers.kabum import KabumScraper
-from price_monitor.scrapers.pichau import PichauScraper
 from price_monitor.scrapers.terabyte import TerabyteScraper
 
 SCRAPERS = (
     KabumScraper,
-    PichauScraper,
     TerabyteScraper,
 )
 

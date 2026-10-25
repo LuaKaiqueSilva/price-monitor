@@ -1,3 +1,4 @@
+import re
 from abc import ABC, abstractmethod
 from decimal import Decimal
 from urllib.parse import urlsplit
@@ -64,14 +65,32 @@ class BaseScraper(ABC):
         )
 
     def _parse_price(self, text: str) -> Decimal:
-        """Convert Brazilian price text into Decimal."""
+        """Convert common Brazilian and international price formats to Decimal."""
 
-        cleaned = (
-            text.replace("R$", "")
-            .replace("\xa0", "")
-            .replace(".", "")
-            .replace(",", ".")
-            .strip()
-        )
+        cleaned = re.sub(r"[^\d,.]", "", text)
+        if not cleaned:
+            raise ValueError(f"Price contains no digits: {text!r}")
 
-        return Decimal(cleaned)
+        last_separator = max(cleaned.rfind("."), cleaned.rfind(","))
+        if last_separator == -1:
+            return Decimal(cleaned)
+
+        integer_part = re.sub(r"[.,]", "", cleaned[:last_separator])
+        fractional_part = cleaned[last_separator + 1 :]
+        separators = [character for character in cleaned if character in ".,"]
+        groups = re.split(r"[.,]", cleaned)
+
+        # Three trailing digits indicate a thousands group (for example 1.234).
+        if len(fractional_part) == 3 and (
+            len(separators) == 1
+            or (
+                len(set(separators)) == 1
+                and all(len(group) == 3 for group in groups[1:])
+            )
+        ):
+            return Decimal("".join(groups))
+
+        if not fractional_part:
+            raise ValueError(f"Price has no digits after its separator: {text!r}")
+
+        return Decimal(f"{integer_part}.{fractional_part}")

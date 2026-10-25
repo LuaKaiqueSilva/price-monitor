@@ -19,7 +19,6 @@ A local dashboard for tracking product prices from Brazilian online stores. Add 
 ## Supported stores
 
 - KaBuM!
-- Pichau
 - TerabyteShop
 
 Scrapers depend on each store's current page structure, which may change over time.
@@ -82,6 +81,12 @@ Install optional formatting and linting tools with:
 
 ```bash
 python -m pip install -e ".[dev]"
+```
+
+Run the offline test suite with:
+
+```bash
+python -m unittest discover -v
 ```
 
 ## Project structure
