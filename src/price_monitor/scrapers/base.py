@@ -2,14 +2,14 @@ import json
 import logging
 import re
 from abc import ABC, abstractmethod
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from urllib.parse import urlsplit
 
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from price_monitor.exceptions import ScraperConnectionError
+from price_monitor.exceptions import ProductNotFoundError, ScraperConnectionError
 from price_monitor.models import ProductData
 
 HEADERS = {
@@ -197,3 +197,14 @@ class BaseScraper(ABC):
             if price:
                 return price
         return None
+
+    def _parse_product_price(self, text: str) -> Decimal:
+        """Parse a scraped price and expose malformed values as a domain error."""
+
+        try:
+            price = self._parse_price(text)
+        except (InvalidOperation, ValueError) as error:
+            raise ProductNotFoundError("Product price could not be parsed.") from error
+        if price <= 0:
+            raise ProductNotFoundError("Product price must be greater than zero.")
+        return price

@@ -151,6 +151,32 @@ class StoreParserTests(unittest.TestCase):
         with self.assertRaises(ProductNotFoundError):
             KabumScraper()._parse_page(html, "https://www.kabum.com.br/produto/123")
 
+    def test_empty_store_selectors_fall_back_to_json_ld(self) -> None:
+        html = '''
+            <h1></h1><h4 class="text-secondary-500"></h4>
+            <script type="application/ld+json">
+            {"@type":"Product","name":"Produto reserva",
+             "offers":{"price":"12.50"}}
+            </script>
+        '''
+
+        product = KabumScraper()._parse_page(
+            html, "https://www.kabum.com.br/produto/123"
+        )
+
+        self.assertEqual(product.name, "Produto reserva")
+        self.assertEqual(product.price, Decimal("12.50"))
+
+    def test_invalid_or_zero_store_price_uses_a_product_error(self) -> None:
+        for price in ("indisponível", "0"):
+            with self.subTest(price=price), self.assertRaisesRegex(
+                ProductNotFoundError, "Product price"
+            ):
+                KabumScraper()._parse_page(
+                    f'<h1>Produto</h1><h4 class="text-secondary-500">{price}</h4>',
+                    "https://www.kabum.com.br/produto/123",
+                )
+
     def test_parses_pichau_sample_html(self) -> None:
         scraper = PichauScraper()
         html = """

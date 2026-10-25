@@ -20,18 +20,20 @@ class TerabyteScraper(BaseScraper):
         soup = BeautifulSoup(html, "lxml")
 
         title = soup.find("h1", class_="tit-prod")
-        name = title.get_text(strip=True) if title else self._fallback_product_name(soup)
+        name = (
+            title.get_text(strip=True) if title else ""
+        ) or self._fallback_product_name(soup)
         if not name:
             raise ProductNotFoundError("Product title not found.")
 
         price = soup.find("p", id="valVista")
-        price_text = price.get_text() if price else self._fallback_product_price(soup)
+        price_text = (price.get_text() if price else "") or self._fallback_product_price(soup)
         if not price_text:
             raise ProductNotFoundError("Product price not found.")
 
         return ProductData(
             name=name,
-            price=self._parse_price(price_text),
+            price=self._parse_product_price(price_text),
             currency="BRL",
             store="Terabyte",
             url=url,
