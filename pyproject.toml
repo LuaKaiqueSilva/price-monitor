@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "price-monitor"
-version = "0.1.0"
+version = "1.0.0"
 description = "Open-source application for monitoring product prices across multiple online stores."
 readme = "README.md"
 requires-python = ">=3.11"
