@@ -14,7 +14,7 @@ This roadmap separates improvements to the current local app from larger future 
 ## Next
 
 - Improve scraper resilience when stores change their page markup or block requests.
-- Pichau's parser now handles its observed Pix selector, JSON-LD, and price metadata. Keep it disabled until direct Requests fetching no longer returns the site's HTTP 403 maintenance page.
+- Pichau pages are rendered in a visible Chromium window because direct HTTP and headless Chromium requests receive HTTP 403; the scraper reads the Pix price selector and metadata.
 
 ## Later
 

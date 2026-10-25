@@ -23,6 +23,7 @@ A local dashboard for tracking product prices from Brazilian online stores. Add 
 
 - KaBuM!
 - TerabyteShop
+- Pichau (uses a Chromium browser; see optional setup below)
 
 Scrapers depend on each store's current page structure, which may change over time.
 
@@ -63,6 +64,19 @@ Install the project and its dependencies:
 ```bash
 python -m pip install -e .
 ```
+
+Pichau blocks direct HTTP scraping and headless Chromium, so its scraper opens a
+visible Chromium window to read product pages. Install the optional dependency
+and browser if you want Pichau support:
+
+```bash
+python -m pip install -e ".[pichau]"
+python -m playwright install chromium
+```
+
+Pichau scraping requires a desktop session because Chromium must open visibly.
+The browser window closes after the price is read. Other store scrapers do not
+need Chromium.
 
 ## Run the dashboard
 

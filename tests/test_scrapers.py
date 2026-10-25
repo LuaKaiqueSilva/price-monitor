@@ -42,6 +42,7 @@ class StoreSelectionTests(unittest.TestCase):
         urls_and_types = (
             ("https://www.kabum.com.br/produto/123", KabumScraper),
             ("https://www.terabyteshop.com.br/produto/123", TerabyteScraper),
+            ("https://www.pichau.com.br/produto/123", PichauScraper),
         )
 
         for url, scraper_type in urls_and_types:
@@ -59,11 +60,6 @@ class StoreSelectionTests(unittest.TestCase):
     def test_rejects_non_http_schemes(self) -> None:
         with self.assertRaises(UnsupportedStoreError):
             ScraperFactory.get_scraper("file://kabum.com.br/produto/123")
-
-    def test_pichau_is_not_enabled_without_verified_live_fetching(self) -> None:
-        with self.assertRaises(UnsupportedStoreError):
-            ScraperFactory.get_scraper("https://www.pichau.com.br/produto/123")
-
 
 class StoreParserTests(unittest.TestCase):
     def test_request_failure_logs_store_host_without_product_path(self) -> None:
@@ -198,9 +194,13 @@ class StoreParserTests(unittest.TestCase):
     def test_parses_pichau_current_price_selector(self) -> None:
         html = '''
             <h1>Placa de vídeo de exemplo</h1>
+            <span class="mui-whrtxo-price_vista_text-smallFontsPricePix">à vista</span>
             <div class="mui-1jk88bq-price_vista-extraSpacePriceVista">
               R$ 239,99
             </div>
+            <span class="mui-1vuxjsq-price_vista_additional-smallFontsPricePix">
+              no PIX com 15% desconto
+            </span>
             <div class="mui-7ie9un-price_total">R$ 282,34</div>
         '''
 
